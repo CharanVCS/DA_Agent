@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from PIL import Image
 from docx import Document
 import PyPDF2
@@ -62,12 +63,11 @@ def ask_llama(prompt, system_prompt=None):
         # Defensive: check response structure
         if (
             isinstance(response, dict)
-            and 'output' in response
-            and 'choices' in response['output']
-            and len(response['output']['choices']) > 0
-            and 'text' in response['output']['choices'][0]
+            and 'choices' in response
+            and len(response['choices']) > 0
+            and 'text' in response['choices'][0]
         ):
-            return response['output']['choices'][0]['text'].strip()
+            return response['choices'][0]['text'].strip()
         else:
             return f"Unexpected API response: {response}"
     except Exception as e:
@@ -110,7 +110,7 @@ if data is not None:
             col = st.selectbox('Select column for histogram', columns)
             if col:
                 fig, ax = plt.subplots()
-                data[col].hist(ax=ax, bins=20)
+                sns.histplot(data=data, x=col, ax=ax)
                 ax.set_title(f'Histogram of {col}')
                 st.pyplot(fig)
         else:
