@@ -1,0 +1,8 @@
+streamlit
+pandas
+numpy
+matplotlib
+Pillow
+python-docx
+PyPDF2
+together
