@@ -103,15 +103,20 @@ model_options = [
 ]
 selected_model = st.selectbox('Select Model', model_options, index=1)
 
-analyzed = None
+if 'analyzed' not in st.session_state:
+    st.session_state.analyzed = False
+if 'answer' not in st.session_state:
+    st.session_state.answer = None
+
+
 if st.button('Analyze Data'):
-    analyzed = True
-    prompt = f"Summarize this dataset:\n{data.head(50).to_csv(index=False)}"
+    st.session_state.analyzed = True
+    prompt = f"Summarize this dataset:\n{data.head(50).to_csv(index=False)} in single para"
     with st.spinner("Generating summary..."):
-        answer = ask_llama(prompt)
-    st.markdown(f'**Summary:** {answer}')
-    
-if analyzed:
+        st.session_state.answer = ask_llama(prompt)
+
+if st.session_state.analyzed:
+    st.markdown(f'**Summary:** {st.session_state.answer}')
     if isinstance(data, pd.DataFrame):
         st.subheader('Visualize Data')
         columns = data.select_dtypes(include=[np.number]).columns.tolist()
@@ -129,7 +134,7 @@ user_question = st.text_input('Ask a question about your data:')
 if user_question:
     if data is None:
         st.write('Please upload a file and analyze data first.')
-    elif analyzed is None:
+    elif st.session_state.analyzed is None:
         st.write('Please analyze data first.')
     else :
         if isinstance(data, pd.DataFrame):
