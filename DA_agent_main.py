@@ -110,7 +110,8 @@ if st.button('Analyze Data'):
     with st.spinner("Generating summary..."):
         answer = ask_llama(prompt)
     st.markdown(f'**Summary:** {answer}')
-
+    
+if analyzed:
     if isinstance(data, pd.DataFrame):
         st.subheader('Visualize Data')
         columns = data.select_dtypes(include=[np.number]).columns.tolist()
