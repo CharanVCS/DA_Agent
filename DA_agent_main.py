@@ -75,6 +75,23 @@ def ask_llama(prompt, system_prompt=None):
 
 uploaded_file = st.file_uploader('Upload your file', type=['csv', 'xlsx', 'xls', 'txt', 'doc', 'docx', 'pdf', 'png', 'jpg', 'jpeg', 'bmp', 'gif'])
 
+
+data = None
+if uploaded_file:
+    try:
+        data = read_file(uploaded_file)
+        st.success('File loaded successfully!')
+        
+        if isinstance(data, pd.DataFrame):
+            st.write('Preview:')
+            st.dataframe(data.head())
+        elif isinstance(data, Image.Image):
+            st.image(data, caption='Uploaded Image', use_column_width=True)
+        else:
+            st.text_area('File Content', data[:1000] if isinstance(data, str) else str(data)[:1000], height=200)
+    except Exception as e:
+        st.error(f'Error loading file: {e}')
+
 model_options = [
     'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8',
     'meta-llama/Llama-3.3-70B-Instruct-Turbo',
@@ -86,22 +103,13 @@ model_options = [
 ]
 selected_model = st.selectbox('Select Model', model_options, index=1)
 
-data = None
-if uploaded_file:
-    try:
-        data = read_file(uploaded_file)
-        st.success('File loaded successfully!')
-        if isinstance(data, pd.DataFrame):
-            st.write('Preview:')
-            st.dataframe(data.head())
-        elif isinstance(data, Image.Image):
-            st.image(data, caption='Uploaded Image', use_column_width=True)
-        else:
-            st.text_area('File Content', data[:1000] if isinstance(data, str) else str(data)[:1000], height=200)
-    except Exception as e:
-        st.error(f'Error loading file: {e}')
-
-if data is not None:
+analyzed = None
+if st.button('Analyze Data'):
+    analyzed = True
+    prompt = f"Summarize this dataset:\n{data.head(50).to_csv(index=False)}"
+    with st.spinner("Generating summary..."):
+        answer = ask_llama(prompt)
+    st.markdown(f'**Summary:** {answer}')
 
     if isinstance(data, pd.DataFrame):
         st.subheader('Visualize Data')
@@ -116,8 +124,13 @@ if data is not None:
         else:
             st.info('No numeric columns available for visualization.')
 
-    user_question = st.text_input('Ask a question about your data:')
-    if user_question:
+user_question = st.text_input('Ask a question about your data:')
+if user_question:
+    if data is None:
+        st.write('Please upload a file and analyze data first.')
+    elif analyzed is None:
+        st.write('Please analyze data first.')
+    else :
         if isinstance(data, pd.DataFrame):
             context = data.head(20).to_csv(index=False)
         elif isinstance(data, str):
@@ -128,3 +141,4 @@ if data is not None:
         with st.spinner('Thinking...'):
             answer = ask_llama(prompt)
         st.markdown(f'**Agent:** {answer}')
+    
