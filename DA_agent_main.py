@@ -111,9 +111,28 @@ if 'answer' not in st.session_state:
 
 if st.button('Analyze Data'):
     st.session_state.analyzed = True
-    prompt = f"Summarize this dataset:\n{data.head(50).to_csv(index=False)} in single para"
+    def analyze_data(file):
+        if file.name.endswith('.csv'):
+            data = pd.read_csv(file)
+            prompt = f"Summarize this dataset:\n{data.head(50).to_csv(index=False)} in a single paragraph"
+        elif file.name.endswith(('.xls', '.xlsx')):
+            data = pd.read_excel(file)
+            prompt = f"Summarize this dataset:\n{data.head(50).to_csv(index=False)} in a single paragraph"
+        elif file.name.endswith('.json'):
+            data = json.load(file)
+            prompt = f"Summarize this JSON data:\n{json.dumps(data, indent=2)[:500]} in a single paragraph"
+        elif file.name.endswith(('.jpg', '.jpeg', '.png')):
+            image = Image.open(file)
+            prompt = "Analyze this image and summarize its contents in a single paragraph"
+        else:
+            prompt = "Unsupported file format"
+        
+        return ask_llama(prompt)
+
     with st.spinner("Generating summary..."):
-        st.session_state.answer = ask_llama(prompt)
+        st.session_state.answer = analyze_data(uploaded_file)
+else:
+     st.write('Please upload a file and start Analyze data.')
 
 if st.session_state.analyzed:
     st.markdown(f'**Summary:** {st.session_state.answer}')
