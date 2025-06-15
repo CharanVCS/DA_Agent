@@ -8,7 +8,7 @@ from docx import Document
 import PyPDF2
 import together
 import tempfile
-import os
+import json
 
 # Set your Together.ai API key
 TOGETHER_API_KEY = '4d808f2b2135fe4c2c3a42ef1c9e47d1bc48921f1a7eb11cef1e4d40c1960a0b'  # Replace with your key
