@@ -3,8 +3,8 @@ pandas
 numpy
 matplotlib
 seaborn
-Pillow
+pillow
 python-docx
 PyPDF2
 together
-openpyxl
+python-dotenv
